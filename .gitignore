@@ -12,7 +12,7 @@ backend/venv/
 backend/models/
 backend/uploads/
 *.db
-
+chatbot/.env
 # Frontend
 frontend/node_modules/
 frontend/.next/
