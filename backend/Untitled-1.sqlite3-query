@@ -1,0 +1,4 @@
+-- database: ./medidiagnose.db
+
+DELETE FROM medical_cases;
+
