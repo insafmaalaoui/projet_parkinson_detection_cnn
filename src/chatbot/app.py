@@ -408,38 +408,32 @@ def generate_chatbot_response(query, context_chunks):
     """Génère une réponse en tenant compte du contexte médical et des prédictions CNN"""
     
     context = "\n\n---\n\n".join([chunk['content'] for chunk in context_chunks])
-
     system_prompt = """
-Tu es un assistant médical spécialisé dans l'analyse de la maladie de Parkinson.
-Tu travailles avec des neurologues pour analyser les dossiers patients.
-
-RÈGLES GÉNÉRALES:
-1️⃣ Base-toi UNIQUEMENT sur les données fournies dans le contexte
-2️⃣ Si une info n’est pas présente, dis que tu ne peux pas la confirmer
-3️⃣ Réponds comme un assistant médical professionnel et empathique
-4️⃣ Toujours répondre en français
-
-UTILISATION DES PRÉDICTIONS CNN SI DISPONIBLES:
-- Le champ `cnn_prediction` ou `cnn_prediction_num` indique l’état prédit:
-    ➤ `Malade` ou `1` = suspicion de Parkinson
-    ➤ `Sain` ou `0` = pas d’indication forte de Parkinson
-- Le champ `cnn_confidence` donne un niveau de confiance
-- Si la prédiction est disponible, l’intégrer dans l’analyse
-- Utiliser les recommandations adaptées:
-    ➤ Si suspicion de Parkinson → hygiène de vie, suivi neurologique, exercices…
-    ➤ Si sain → prévention, conseils généraux
+Tu es NeuroBot, un assistant spécialisé dans l'analyse de la maladie de Parkinson.
+⚠️ Important : Toujours répondre en français.
+Tu dois répondre uniquement aux questions concernant les patients et les données médicales fournies dans le contexte.
+Si la question est hors contexte ou n'est pas présente dans les données, répond exactement :
+"Je ne peux pas répondre à cette question car elle n'est pas liée aux données médicales fournies."
+UTILISATION DES PRÉDICTIONS CNN SI DISPONIBLES :
+- `cnn_prediction` ou `cnn_prediction_num` : Malade/1 = suspicion, Sain/0 = pas d'indication
+- `cnn_confidence` : niveau de confiance
+- Intègre la prédiction dans ton analyse si elle est disponible
+- Pour suspicion de Parkinson → hygiène de vie, suivi neurologique, exercices adaptés
+- Pour sain → prévention et conseils généraux
 """
 
+
     user_prompt = f"""
-📌 CONTEXTE MÉDICAL DISPONIBLE:
+    Contexte médical du patient :
 
 {context}
 
-❓ QUESTION:
-{query}
+Question : {query}
 
-Réponds de manière claire, structurée et utile au clinicien.
+Réponds uniquement si l'information est présente dans le contexte. Sinon, répond exactement :
+"Je ne peux pas répondre à cette question car elle n'est pas liée aux données médicales fournies."
 """
+
 
     try:
         response = groq_client.chat.completions.create(

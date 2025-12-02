@@ -927,6 +927,102 @@ def get_all_users(
     } for user in users]
 
 
+@app.get("/admin/patients_archive")
+def admin_patients_archive(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    """Return all medical cases (archive) with patient info, images, neurologist report and PDF path.
+    Admin only.
+    """
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    cases = db.query(models.MedicalCase).all()
+    out = []
+    for case in cases:
+        patient = case.patient
+        # patient info if present
+        info_obj = db.query(models.InfoPatient).filter(models.InfoPatient.user_id == patient.id).first()
+        info = None
+        if info_obj:
+            info = {
+                'first_name': info_obj.first_name,
+                'last_name': info_obj.last_name,
+                'date_of_birth': info_obj.date_of_birth,
+                'age': info_obj.age,
+                'gender': info_obj.gender,
+                'phone': getattr(info_obj, 'phone', None),
+            }
+
+        images = []
+        for img in case.images:
+            images.append({
+                'id': img.id,
+                'filename': img.filename,
+                'url': (img.file_path if getattr(img, 'file_path', None) else f"/uploads/{img.filename}"),
+            })
+
+        out.append({
+            'case_id': case.id,
+            'status': case.status,
+            'created_at': case.created_at,
+            'updated_at': case.updated_at,
+            'patient': {
+                'id': patient.id,
+                'email': patient.email,
+                'first_name': patient.first_name,
+                'last_name': patient.last_name,
+            },
+            'patient_info': info,
+            'images': images,
+            'neurologist_report': getattr(case, 'neurologist_report', None),
+            'report_pdf': getattr(case, 'report_pdf', None),
+            'cnn_prediction': getattr(case, 'cnn_prediction', None),
+        })
+
+    return {'archive': out}
+
+
+@app.get('/admin/user_actions')
+def admin_user_actions(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    """Return a synthesized list of recent user actions for admin auditing.
+    This builds actions from users and cases (registrations, case creation, report submission).
+    """
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=403, detail='Admin access required')
+
+    actions = []
+
+    # recent registrations
+    recent_users = db.query(models.User).order_by(models.User.created_at.desc()).limit(50).all()
+    for u in recent_users:
+        actions.append({'timestamp': u.created_at, 'type': 'user_registered', 'user_id': u.id, 'email': u.email})
+
+    # recent case creations
+    recent_cases = db.query(models.MedicalCase).order_by(models.MedicalCase.created_at.desc()).limit(100).all()
+    for c in recent_cases:
+        actions.append({'timestamp': c.created_at, 'type': 'case_created', 'case_id': c.id, 'patient_id': c.patient_id, 'status': c.status})
+
+    # recent report submissions (cases with status changed to completed)
+    recent_reports = db.query(models.MedicalCase).filter(models.MedicalCase.status == 'completed').order_by(models.MedicalCase.updated_at.desc()).limit(100).all()
+    for r in recent_reports:
+        actions.append({'timestamp': r.updated_at, 'type': 'report_submitted', 'case_id': r.id, 'neurologist_id': getattr(r, 'neurologist_id', None)})
+
+    # sort actions by timestamp desc and return top 200
+    actions_sorted = sorted([a for a in actions if a.get('timestamp') is not None], key=lambda x: x['timestamp'], reverse=True)[:200]
+
+    # serialize timestamps to isoformat for JSON
+    for a in actions_sorted:
+        if hasattr(a['timestamp'], 'isoformat'):
+            a['timestamp'] = a['timestamp'].isoformat()
+
+    return {'actions': actions_sorted}
+
+
 @app.delete("/admin/users/{user_id}")
 def delete_user(
     user_id: str,
@@ -944,6 +1040,42 @@ def delete_user(
     db.delete(user)
     db.commit()
     return {"message": "User deleted"}
+
+
+@app.put('/admin/users/{user_id}')
+def update_user_admin(
+    user_id: str,
+    payload: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    """Update a user's basic fields (admin only). Accepts JSON with keys: first_name, last_name, role, speciality, email"""
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=403, detail='Admin access required')
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail='User not found')
+
+    # Update allowed fields
+    for k in ('first_name', 'last_name', 'role', 'speciality', 'email'):
+        if k in payload:
+            try:
+                setattr(user, k, payload.get(k))
+            except Exception:
+                pass
+
+    db.commit()
+    db.refresh(user)
+    return {
+        'id': user.id,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'role': user.role,
+        'speciality': user.speciality,
+        'created_at': user.created_at,
+    }
 
 
 # Health check

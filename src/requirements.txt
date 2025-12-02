@@ -1,0 +1,10 @@
+numpy
+pandas
+scikit-learn
+matplotlib
+seaborn
+opencv-python
+pydicom
+tensorflow>=2.12
+mlflow
+pytest

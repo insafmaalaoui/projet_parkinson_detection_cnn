@@ -14,7 +14,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 # The database lives in the project's `backend` folder (sibling of `chatbot`)
 BASE_DIR = Path(__file__).parent
 REPO_ROOT = BASE_DIR.parent
-DB_PATH = str(REPO_ROOT / "backend" / "medidiagnose.db")
+DB_PATH = str(REPO_ROOT /  "api" / "medidiagnose.db")
 
 # Configuration du chunking
 CHUNK_SIZE = 500

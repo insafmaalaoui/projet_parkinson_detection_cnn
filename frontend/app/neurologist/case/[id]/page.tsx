@@ -4,7 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import NeurologistSidebar from "@/components/NeurologistSidebar";
 import UploadPreview from '@/components/UploadPreview'
-import ChatbotShortcut from "@/components/ChatbotShortcut";
+
 
 interface CaseDetail {
   id: string;
@@ -112,7 +112,7 @@ export default function NeurologistCasePage() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:8000/chatbot", {
+      const res = await fetch("http://localhost:8000/chatbot/message", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -216,7 +216,7 @@ export default function NeurologistCasePage() {
                 <div className="grid grid-cols-2 gap-4">
                   {caseDetail?.images.map((img) => (
                     <div key={img.id} className="bg-slate-100 rounded-lg overflow-hidden h-68">
-                      <UploadPreview src={img.url || '/placeholder.svg'} alt={`Image ${img.id}`} className="w-full h-48 rounded-lg overflow-hidden" />
+                      <UploadPreview src={img.url || '/placeholder.svg'} />
                     </div>
                   ))}
                 </div>
@@ -248,14 +248,8 @@ export default function NeurologistCasePage() {
 
 
               <div className="medical-card p-6">
-                  <Button
-                    onClick={() => router.push("/chatbot")}
-                    className="w-full bg-blue-300 hover:bg-blue-700"
-  >
-                      S’aider par un assistant
-                  </Button>
                 <h3 className="text-lg font-semibold mb-4">Rapport Médical structuré</h3>
-                
+
                 <label className="text-sm font-medium">Résumé clinique</label>
                 <textarea
                   value={clinicalSummary}

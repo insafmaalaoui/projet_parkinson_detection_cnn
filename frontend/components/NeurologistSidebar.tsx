@@ -42,6 +42,7 @@ export default function NeurologistSidebar() {
           {navItem("Dossiers traités", "/neurologist/treated", FiFileText)}
           {navItem("Patients", "/neurologist/patients", FiUsers)}
           {navItem("Assistant Médical", "/chatbot", FiMessageSquare)}
+          {/* Assistant 2 removed */}
         </nav>
       </div>
 

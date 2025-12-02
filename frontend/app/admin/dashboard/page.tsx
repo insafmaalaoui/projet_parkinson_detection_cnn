@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
+import AdminPatientArchive from "@/components/Admin/AdminPatientArchive";
+import AdminActionsList from "@/components/Admin/AdminActionsList";
 
 interface User {
   id: string;
@@ -155,6 +157,18 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h2 className="text-3xl font-bold text-slate-900 mb-6">Archive & Actions</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="col-span-2">
+            <AdminPatientArchive />
+          </div>
+          <div>
+            <AdminActionsList />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,18 +1,18 @@
 # Python / FastAPI
-backend/venv/
-backend/__pycache__/
-backend/uploads/
-backend/medidiagnose.db
-backend/*.sqlite3
-backend/models/
+src/api/venv/
+src/api/__pycache__/
+src/api/uploads/
+src/api/medidiagnose.db
+src/api/*.sqlite3
+src/api/models/
 
 
 # Backend
-backend/venv/
-backend/models/
-backend/uploads/
+src/api/venv/
+src/api/models/
+src/api/uploads/
 *.db
-chatbot/.env
+src/chatbot/.env
 # Frontend
 frontend/node_modules/
 frontend/.next/
@@ -29,7 +29,7 @@ frontend/node_modules/
 
 
 # Chatbot
-chatbot/__pycache__/
+src/chatbot/__pycache__/
 
 # OS / IDE
 .DS_Store
@@ -37,3 +37,8 @@ chatbot/__pycache__/
 .env
 *.env.local
 
+data/
+src/mlruns/
+src/mlflow.db
+src/venv/
+src/models/cnn_parkinson.h5
