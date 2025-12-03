@@ -1,4 +1,5 @@
-🏥 MediDiagnose - Full Stack AI Medical App
+# **MediDiagnose - Full Stack AI Medical App**
+
 
 Application complète d’IA pour le diagnostic de la maladie de Parkinson via IRM, avec chatbot RAG et suivi MLflow.
 
@@ -7,13 +8,11 @@ Application complète d’IA pour le diagnostic de la maladie de Parkinson via I
 1️⃣ Backend
 cd backend/src/api
 
-# Activer l’environnement virtuel
-# Windows
+### Activer l’environnement virtuel
+### Windows
 venv\Scripts\activate
-# Mac/Linux
-source venv/bin/activate
 
-# Installer dépendances si pas déjà fait
+### Installer dépendances si pas déjà fait
 pip install -r requirements.txt
 
 
